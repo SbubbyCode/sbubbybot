@@ -329,8 +329,8 @@ def commonRepost(submission):
 
 def sigintHandler(signal, frame):
     print(f"\u001b[3D Received (most likely) Ctrl+c, exiting.")
-    exit(0)
     database.close()
+    exit(0)
 
 
 if __name__ == "__main__":
