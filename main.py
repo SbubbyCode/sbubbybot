@@ -75,7 +75,7 @@ def main():
 
 
 def repostAndFlairThreadFunc():
-    print("repost and flair thread started")
+    logger.info("repost and flair thread started")
     for submission in sbubby.stream.submissions():
         # skip post if author is moderator
         moderators = sbubby.moderator()
