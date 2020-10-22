@@ -5,3 +5,4 @@ logfile
 output.txt
 startAll.sh
 __pycache__
+*.code-workspace
