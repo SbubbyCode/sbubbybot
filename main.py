@@ -11,6 +11,20 @@ from dotenv import load_dotenv  # need this to import env. vars
 from sys import exit  # to exit gracefully from Ctrl+c
 from signal import signal, SIGINT  # to exit gracefully from C
 import re  # regex for the modmail
+from digiformatter import styles #VT-100 formatting for console text
+import logging  #logging
+from digiformatter import logger as digilogger  #better logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+dfhandler = digilogger.DigiFormatterHandler()
+
+logger = logging.getLogger("sbubbybot")
+logger.handlers = []
+logger.propagate = False
+logger.addHandler(dfhandler)
+
+styles.create("angry", fg="dark_orange", attr="bold", prefix="ANGY", showtime=True, showprefix=True)
 
 # load env variables (only for locally testing, heroku takes care of it othewise)
 load_dotenv()
@@ -38,8 +52,8 @@ try:
     database = psycopg2.connect(user="postgres", password=os.environ['database_password'],
                                 database=os.environ["database_name"], host=os.environ["DATABASE_URL"], port="5432")
 except Exception as err:
-    print(err)
-    print("Error connecting normal way, try other way")
+    logger.error(err)
+    logger.warn("Error connecting normal way, try other way")
     database = psycopg2.connect(os.environ['DATABASE_URL'], sslmode='require')
 
 cur = database.cursor()
@@ -51,13 +65,13 @@ def main():
     #            print(i.subject)
     #            print("\t", i.obj_ids)
     #        return
-    print("creating threads")
+    logger.info("creating threads")
     oneMinTimerThread = threading.Thread(target=oneMinTimerThreadFunc)
     repostAndFlairThread = threading.Thread(target=repostAndFlairThreadFunc)
-    print("starting threads")
+    logger.info("starting threads")
     oneMinTimerThread.start()
     repostAndFlairThread.start()
-    print("threads started")
+    logger.info("threads started")
 
 
 def repostAndFlairThreadFunc():
@@ -77,7 +91,7 @@ def repostAndFlairThreadFunc():
 
 
 def oneMinTimerThreadFunc():  # not exactly one minute
-    print("one Min Timer thread started")
+    logger.info("one Min Timer thread started")
     while True:
         # check for any flair stuff that needs to be checked up on
         checkFlairDB()
@@ -90,7 +104,7 @@ def oneMinTimerThreadFunc():  # not exactly one minute
 
         
 def sundaySbubby():
-    print("It is sunday. Sunday Sbubby started...")
+    logger.info("It is sunday. Sunday Sbubby started...")
     # Get and remove the flair templates:
     for flairTemp in sbubby.flair.templates:
         print(flairTemp)
@@ -110,7 +124,7 @@ def sundaySbubby():
         break
     if link is None:
         # we weren't able to find a link, so fail angrily!!!
-        print("\u001b[1mCould not find the Automoderator link! will use placeholder!\u001b[0m")
+        styles.print("Could not find the Automoderator link! will use placeholder!", style = "angry")
         message = """
 For those out of the loop: Sunday Sbubday is a weekly event attempting to bring back and make Eef Freef (nonsensical) and Eeble Freeble (surreal) edits more common! **During this time, only nonsensical and surreal edits are allowed (see FAQ below for more details and information). Others such as those that make some sense (Eaten Fresh) and logoswaps will be removed.**
 
@@ -159,7 +173,7 @@ def unSundaySbubby():
                 if stickied.author == reddit.user.me():
                     stickied.mod.sticky(state=False)
             except Exception as err:
-                print(err)
+                logger.error(err)
                 break
         # sticky most recent automod post.
         for submission in sbubby.search("author:AutoModerator", sort="new", time_filter="week"):
@@ -167,7 +181,7 @@ def unSundaySbubby():
             break
 
 def attemptSundaySbubday():
-    print("<Sunday Sbubday> Attempting to do a sunday sbubday activity!")
+    logger.info("<Sunday Sbubday> Attempting to do a sunday sbubday activity!")
     today = datetime.today().weekday()
 
     # check whether there is a post. stickyNum = 0 means no post
@@ -179,25 +193,25 @@ def attemptSundaySbubday():
                 stickyNum = i
                 break  # there is a post, no need to do anything.
         except Exception as err:
-            print(err)
-            print("no sticky at index ", i)
+            logger.error(err)
+            logger.warn("no sticky at index ", i)
             break  # no more sticky posts, need to add post
 
-    print(today)
+    logger.info(today)
     if today == 6:
         # sunday, check if already post, if not, post
-        print("it is sunday")
+        logger.info("it is sunday")
         if stickyNum == 0:
             sundaySbubby()
     elif today == 0:
         # monday
-        print("it is monday")
+        logger.info("it is monday")
         if stickyNum != 0:
             unSundaySbubby()
 
 
 def checkFlairDB():
-    print("<Database> checking flair db")
+    logger.info("<Database> checking flair db")
     cur.execute("select * from flairs;")
     rows = cur.fetchall()
 
@@ -211,13 +225,13 @@ def checkFlairDB():
         try:
             link_flair_text = submission.link_flair_text
         except Exception as err:
-            print(err)
-            print("error could not get")
+            logger.error(err)
+            logger.warn("error could not get")
 
         if now - epochTime > 590 and link_flair_text is None:
             # remove the post.
-            print("<Database> Post ", submission.id, " is past the time and has no flair.")
-            print("<Database> Time's up! Remove post.")
+            logger.info("<Database> Post ", submission.id, " is past the time and has no flair.")
+            logger.info("<Database> Time's up! Remove post.")
 
             # remove from database
             cur.execute(f"DELETE from flairs where submission_id='{row[0]}';")
@@ -232,7 +246,7 @@ def checkFlairDB():
                         for comment in submission.comments:
                             if comment.author == reddit.user.me():
                                 comment_id = comment.id
-                        print("no comment found by me")
+                        logger.info("no comment found by me")
                         continue  # continues with the next submission in db
                     reddit.comment(comment_id).delete()
 
@@ -242,12 +256,12 @@ def checkFlairDB():
                         submission.mod.send_removal_message("Hi! Your post was removed because it had no flair after 10 minutes of you being notified to flair your post. This messsage was sent automatically, if you think it's an error, send a modmail")
                         submission.unsave()
             except Exception as err:
-                print(err)
-                print("<Database> Could not do: post could have been deleted?? postid=", row[0])
+                logger.error(err)
+                logger.warn("<Database> Could not do: post could have been deleted?? postid=", row[0])
 
         elif submission.link_flair_text is None:
             # there is a flair.
-            print(f"<Database> {submission.id} already has flair, removing from db.")
+            logger.info(f"<Database> {submission.id} already has flair, removing from db.")
             cur.execute(f"DELETE from flairs where submission_id='{row[0]}';")
             if PRODUCTION:
                 # remove the comment as the flair is set
@@ -258,7 +272,7 @@ def checkFlairDB():
                     for comment in submission.comments:
                         if comment.author == reddit.user.me():
                             comment_id = comment.id
-                    print("no comment found by me")
+                    logger.info("no comment found by me")
                     continue  # continues with the next submission in db
                 reddit.comment(comment_id).delete()
 
@@ -267,7 +281,7 @@ def checkFlairDB():
 
 def doFlair(submission):
     # check to see if flair first
-    print("<Flair> Checking ", submission.id)
+    logger.info("<Flair> Checking ", submission.id)
     if submission.link_flair_text is None and submission.saved is False:
         # check to see if post already been messaged
         hasBeenMessaged = False
@@ -276,8 +290,8 @@ def doFlair(submission):
                 hasBeenMessaged = True
         if not hasBeenMessaged:
             submission.save()
-            print(f"<Flair> message {submission.name} post to remind to flair!")
-            print("<Flair>   created on: ", submission.created_utc)
+            logger.info(f"<Flair> message {submission.name} post to remind to flair!")
+            logger.info("<Flair>   created on: ", submission.created_utc)
             comment_id = None  # only used if PRODUCTION is true, will still insert into db as None
             if PRODUCTION:
                 # make a comment on this post.
@@ -288,11 +302,11 @@ def doFlair(submission):
                     comment_id = comment.id
             cur.execute(f"INSERT INTO FLAIRS (submission_id, time_created, comment_id) VALUES ('{submission.id}', to_timestamp({submission.created_utc}), '{comment_id}') ON CONFLICT (submission_id) DO NOTHING")
         else:
-            print("<Flair> No need for flair message -- one already exists?")
+            logger.info("<Flair> No need for flair message -- one already exists?")
 
 
 def howMuchKarmaModmail():
-    print("<Karma> Anti-\"how much karma\" bot started...")
+    logger.info("<Karma> Anti-\"how much karma\" bot started...")
     for conversation in sbubby.modmail.conversations(limit=20):
         # for each mail, check for specific keywords: "How much Karma" "Karma requirement" "Karma minimum"
         for message in conversation.messages:
@@ -307,10 +321,10 @@ def howMuchKarmaModmail():
 
 
 def commonRepost(submission):
-    print("<Repost> Common reposts bot started...")
-    # Check each item in the imgur album -- if any is over the threshold:
-    #   make a comment with the similarity amount, and then give link that it is similar to.
-    #   mark post as spam(, and if user replies, then send modmail?)
+    logger.info("<Repost> Common reposts bot started...")
+    # TODO: Check each item in the imgur album -- if any is over the threshold:
+    #       make a comment with the similarity amount, and then give link that it is similar to.
+    #       mark post as spam(, and if user replies, then send modmail?)
 
 
 def sigintHandler(signal, frame):
