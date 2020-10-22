@@ -121,7 +121,13 @@ It starts 00:00 Eastern Time every Sunday. If you posted at exactly this time yo
 
 >**What is an Eef Freef!/Eeble Freeble! edit?**
 
-Eef Freef! sbubbies are in-spirit sbubbies. An in-spirit sbubby is nonsensical, like [the original sbubby](https://redd.it/5e2gsk/). Examples are randomly rearranged letters (such as "Subway" edited into "Sbubby"), repeated letters or patterns (such as "AAAAAAAAA"), or anything else that is nonsensical. Out-of-spirit sbubbies have the same concept of editing, except their text makes some sense. An Eeble Freeble! sbubby, aka squbbly, is pretty much a surreal sbubby with unusual changes to the logo, such as cleanly distorted text which creates some random shape, pattern, or otherwise surreal mess. See [the original squbbly by Thomilo44](https://redd.it/8wlloq/) for a reference idea.
+* **Eef Freef!** sbubbies are nonsensical, like [the original sbubby](https://redd.it/5e2gsk/). Examples are randomly rearranged letters (such as "Subway" edited into "Sbubby"), repeated letters or patterns (such as "AAAAAAAAA"), or anything else that is nonsensical.
+
+* **Eeble Freeble!** sbubbies, aka squbbly, is pretty much a surreal sbubby with unusual changes to the logo, such as cleanly distorted text which creates some random shape, pattern, or otherwise surreal mess. See [the original squbbly by Thomilo44](https://redd.it/8wlloq/) for a reference idea.
+
+* **Eaten Fresh!** sbubbies have the same concept of editing, except their text makes some sense or has some meaning.
+
+* **Logoswap** is a subcategory of Eaten Fresh!, but for swapping brand names of logos with another.
 
 >**Do you guys have a discord?**
 
