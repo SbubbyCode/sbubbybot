@@ -101,6 +101,7 @@ def sundaySbubby():
     # get the automod post.
     # sort subreddit by new for author:AutoModerator
     link = None
+    message = None
     linkMessage = "Please see the comments for the post to request new Sbubbies."
     for submission in sbubby.search("author:AutoModerator", sort="new", time_filter="day"):
         # only want to use the first one because it is the most recent
