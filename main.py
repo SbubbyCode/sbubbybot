@@ -313,7 +313,7 @@ def commonRepost(submission):
 
 
 def sigintHandler(signal, frame):
-    print(f"\u001b[3D Received (most likely) Ctrl+c, exiting.")
+    logger.warn(f"Received (most likely) Ctrl+C, exiting.")
     database.close()
     exit(0)
 
