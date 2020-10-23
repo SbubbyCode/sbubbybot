@@ -14,6 +14,8 @@ import re  # regex for the modmail
 from digiformatter import styles #VT-100 formatting for console text
 import logging  #logging
 from digiformatter import logger as digilogger  #better logging
+import importlib.resources as pkg_resources #  read files in reliably
+import sbubbybot.data  # load resources
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -57,6 +59,9 @@ except Exception as err:
     database = psycopg2.connect(os.environ['DATABASE_URL'], sslmode='require')
 
 cur = database.cursor()
+
+# Load the sunday message from file. (this only happens once so it's minimal impact on performance.)
+sunday_message = pkg_resources.read_text(sbubbybot.data, "sunday_message.txt")
 
 
 def main():
@@ -125,27 +130,7 @@ def sundaySbubby():
     if link is None:
         # we weren't able to find a link, so fail angrily!!!
         styles.print("Could not find the Automoderator link! will use placeholder!", style = "angry")
-        message = """
-For those out of the loop: Sunday Sbubday is a weekly event attempting to bring back and make Eef Freef (nonsensical) and Eeble Freeble (surreal) edits more common! **During this time, only nonsensical and surreal edits are allowed (see FAQ below for more details and information). Others such as those that make some sense (Eaten Fresh) and logoswaps will be removed.**
-
-Quick FAQ:
-
->**When does Sunday Sbubday start?**
-
-It starts 00:00 Eastern Time every Sunday. If you posted at exactly this time you'll still be let through but other posters won't be. It will end at 23:59 EST.
-
->**What is an Eef Freef!/Eeble Freeble! edit?**
-
-Eef Freef! sbubbies are in-spirit sbubbies. An in-spirit sbubby is nonsensical, like [the original sbubby](https://redd.it/5e2gsk/). Examples are randomly rearranged letters (such as "Subway" edited into "Sbubby"), repeated letters or patterns (such as "AAAAAAAAA"), or anything else that is nonsensical. Out-of-spirit sbubbies have the same concept of editing, except their text makes some sense. An Eeble Freeble! sbubby, aka squbbly, is pretty much a surreal sbubby with unusual changes to the logo, such as cleanly distorted text which creates some random shape, pattern, or otherwise surreal mess. See [the original squbbly by Thomilo44](https://redd.it/8wlloq/) for a reference idea.
-
->**Do you guys have a discord?**
-
-Yes: https://discord.gg/nErFsAA
-
->**Where can I request sbubbies to be made for me?**
-
-{} **Posts requesting sbubbies will be removed.**
-""".format(linkMessage)
+        message = sunday_message.format(linkMessage)
     # with the message, now post it and sticky it. Unsticky the automod post
     if PRODUCTION:
         if link is not None:
