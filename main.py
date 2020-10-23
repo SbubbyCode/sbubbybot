@@ -15,7 +15,7 @@ from digiformatter import styles #VT-100 formatting for console text
 import logging  #logging
 from digiformatter import logger as digilogger  #better logging
 import importlib.resources as pkg_resources #  read files in reliably
-import sbubbybot.data  # load resources
+import data  # load resources from ./data
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -61,7 +61,7 @@ except Exception as err:
 cur = database.cursor()
 
 # Load the sunday message from file. (this only happens once so it's minimal impact on performance.)
-sunday_message = pkg_resources.read_text(sbubbybot.data, "sunday_message.txt")
+sunday_message = pkg_resources.read_text(data, "sunday_message.txt")
 
 
 def main():
