@@ -5,7 +5,8 @@ import threading  # to be able to run in threads
 import praw  # all the reddit i/o
 import os  # to get enviroment variables containing secrets
 import psycopg2  # used for postgresql database stuff
-from datetime import datetime  # need to get current time for multiple things
+from datetime import timedelta  # timedeltas for comparison
+import arrow  # better datetime
 import time  # for time.sleep
 from dotenv import load_dotenv  # need this to import env. vars
 from sys import exit  # to exit gracefully from Ctrl+c
@@ -167,7 +168,7 @@ def unSundaySbubby():
 
 def attemptSundaySbubday():
     logger.info("<Sunday Sbubday> Attempting to do a sunday sbubday activity!")
-    today = datetime.today().weekday()
+    today = arrow.today("America/New_York").weekday()
 
     # check whether there is a post. stickyNum = 0 means no post
     stickyNum = 0
@@ -202,8 +203,8 @@ def checkFlairDB():
 
     # row[0] = submission id, row[1] = time post created, row[2] = comment telling to flair id.
     for row in rows:
-        epochTime = row[1].timestamp()
-        now = datetime.now().timestamp()
+        epochTime = arrow.get(row[1])
+        now = arrow.now()
         submission = reddit.submission(row[0])  # lazy instance of the thing
         # check if the post should be removed, otherwise, do nothing
         link_flair_text = 0
@@ -213,7 +214,7 @@ def checkFlairDB():
             logger.error(err)
             logger.warn("error could not get")
 
-        if now - epochTime > 590 and link_flair_text is None:
+        if now - epochTime > timedelta(minutes=10) and link_flair_text is None:
             # remove the post.
             logger.info("<Database> Post ", submission.id, " is past the time and has no flair.")
             logger.info("<Database> Time's up! Remove post.")
