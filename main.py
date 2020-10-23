@@ -96,17 +96,24 @@ def repostAndFlairThreadFunc():
             database.commit()
 
 
-def oneMinTimerThreadFunc():  # not exactly one minute
+def oneMinTimerThreadFunc():
     logger.info("one Min Timer thread started")
     while True:
+        # start timer
+        start = arrow.now()
         # check for any flair stuff that needs to be checked up on
         checkFlairDB()
         howMuchKarmaModmail()
 
         # attempt to do sunday sbubday, making sure there is no duplicates is handled in the function
         attemptSundaySbubday()
+        
+        # end timer
+        now = arrow.now()
+        desired_end_time = start.shift(minutes=1)
+        time_remaining = desired_end_time - now
 
-        time.sleep(60)  # 1 min rest
+        time.sleep(max(0, time_remaining.total_seconds()))  # sleep until its been one minute since start
 
         
 def sundaySbubby():
