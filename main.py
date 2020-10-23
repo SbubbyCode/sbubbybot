@@ -101,6 +101,7 @@ def oneMinTimerThreadFunc():
     while True:
         # start timer
         start = arrow.now()
+
         # check for any flair stuff that needs to be checked up on
         checkFlairDB()
         howMuchKarmaModmail()
@@ -109,9 +110,9 @@ def oneMinTimerThreadFunc():
         attemptSundaySbubday()
         
         # end timer
-        now = arrow.now()
-        desired_end_time = start.shift(minutes=1)
-        time_remaining = desired_end_time - now
+        end = arrow.now()
+        desired_restart_time = start.shift(minutes=1)
+        time_remaining = desired_restart_time - end
 
         time.sleep(max(0, time_remaining.total_seconds()))  # sleep until its been one minute since start
 
