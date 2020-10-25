@@ -1,6 +1,3 @@
-# Sheen Patel
-# u/SbubbyBot for the the mods of r/Sbubby
-
 import threading  # to be able to run in threads
 import praw  # all the reddit i/o
 import os  # to get enviroment variables containing secrets
@@ -52,7 +49,7 @@ sbubby = reddit.subreddit('sbubby')
 database = ""
 # connect to the postgresql database
 try:
-    database = psycopg2.connect(user="postgres", password=os.environ['database_password'],
+    database = psycopg2.connect(user="sbubby", password=os.environ['database_password'],
                                 database=os.environ["database_name"], host=os.environ["DATABASE_URL"], port="5432")
 except Exception as err:
     logger.error(err)

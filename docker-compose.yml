@@ -1,0 +1,36 @@
+version: "3.6"
+
+services:
+  db:
+    environment:
+      POSTGRES_USER: sbubby
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: sbubby
+    image: postgres:latest
+    networks:
+      - sbubby
+    ports:
+      - 5429:5432
+    restart: always
+    volumes:
+      - ./postgres-data:/var/lib/postgresql
+
+  bot:
+    build: ./src
+    user: sbubby
+    depends_on:
+      - db
+    environment:
+      STAGE: dev
+      SQLALCHEMY_DATABASE_URI: postgresql+psycopg2://sbubby:dev@db/sbubby
+      SQLALCHEMY_TRACK_MODIFICATIONS: 0
+    networks:
+      - sbubby
+    ports:
+      - 5000:5000
+    volumes:
+      - ./api:/opt/api
+    restart: always
+
+networks:
+  sbubby:
